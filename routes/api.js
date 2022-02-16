@@ -89,7 +89,7 @@ module.exports = function (app) {
         Book.findById(bookid).select('-commentcount -__v').exec((err, book) => {
           if (err) {
             console.log(err);
-            res.json({'error': err})
+            res.send('no book exists')
           } else if (!book) {
             res.send('no book exists')
           } else if (book) {
@@ -104,6 +104,35 @@ module.exports = function (app) {
       let bookid = req.params.id;
       let comment = req.body.comment;
       //json res format same as .get
+
+      if (!req.body.comment) {res.send('missing required field comment')}
+      else if (!req.params.id) {res.send('missing required bookId field')}
+      else {
+        Book.findById(bookid, (err, book) => {
+          if (err) {
+            console.log(err);
+            res.send('no book exists');
+          } else if(!book) {
+            res.send('no book exists')
+          } else {
+            book['comments'].push(comment);
+            book['commentcount']++
+            book.save((err, data) => {
+              if (err) {
+                console.log(err);
+                res.send('error updating comments ' + err)
+              } else {
+                console.log(data);
+                res.json({
+                  '_id': data.id,
+                  'title': data.title,
+                  'comments': data.comments
+                })
+              }
+            })
+          }
+        })
+      }
     })
     
     .delete(function(req, res){
