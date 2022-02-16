@@ -138,6 +138,17 @@ module.exports = function (app) {
     .delete(function(req, res){
       let bookid = req.params.id;
       //if successful response will be 'delete successful'
+      Book.findByIdAndRemove(bookid, (err, data) => {
+        if (err) {
+          console.log(err);
+          res.send('no book exists');
+        } else if (!data) {
+          res.send('no book exists');
+        } else {
+          console.log(data);
+          res.send('delete successful');
+        }
+      })
     });
   
 };
