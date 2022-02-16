@@ -43,6 +43,9 @@ module.exports = function (app) {
     })
     
     .post(function (req, res){
+
+      //response will contain new book object including atleast _id and title
+
       let title = req.body.title;
 
       if (!req.body.title) { res.send('missing required field title') }
@@ -67,7 +70,7 @@ module.exports = function (app) {
       }
 
 
-      //response will contain new book object including atleast _id and title
+      
     })
     
     .delete(function(req, res){
@@ -78,8 +81,23 @@ module.exports = function (app) {
 
   app.route('/api/books/:id')
     .get(function (req, res){
-      let bookid = req.params.id;
       //json res format: {"_id": bookid, "title": book_title, "comments": [comment,comment,...]}
+
+      let bookid = req.params.id;
+      if (!req.params.id) {res.send('missing required id field')};
+      if (req.params.id) {
+        Book.findById(bookid).select('-commentcount -__v').exec((err, book) => {
+          if (err) {
+            console.log(err);
+            res.json({'error': err})
+          } else if (!book) {
+            res.send('no book exists')
+          } else if (book) {
+            console.log(book);
+            res.json(book);
+          }
+        })
+      }
     })
     
     .post(function(req, res){
