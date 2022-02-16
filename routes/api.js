@@ -8,6 +8,22 @@
 
 'use strict';
 
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+require('dotenv').config();
+
+// Connect to database using mongoose
+mongoose.connect(process.env.DB, { useNewUrlParser: true, useUnifiedTopology: true});
+
+// Book Schema for new books
+const bookSchema = new Schema({
+  "title": {type: String, required: true},
+  "comments": [String]
+})
+
+// Model for library
+const Book = mongoose.model('Book', bookSchema);
+
 module.exports = function (app) {
 
   app.route('/api/books')
@@ -18,6 +34,28 @@ module.exports = function (app) {
     
     .post(function (req, res){
       let title = req.body.title;
+
+      if (!req.body.title) { res.send('missing required field title') }
+
+      if (req.body.title) {
+        let newBook = new Book({
+          'title': title,
+          'comments': []
+        }).save((err, data) => {
+          if (err) {
+            console.log(err);
+            res.send(err)
+          } else {
+            console.log(data);
+            res.json({
+              "title": data.title,
+              "_id": data["_id"]
+            })
+          }
+        })
+      }
+
+
       //response will contain new book object including atleast _id and title
     })
     
