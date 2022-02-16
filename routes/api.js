@@ -18,7 +18,8 @@ mongoose.connect(process.env.DB, { useNewUrlParser: true, useUnifiedTopology: tr
 // Book Schema for new books
 const bookSchema = new Schema({
   "title": {type: String, required: true},
-  "comments": [String]
+  "comments": [String],
+  "commentcount": Number
 })
 
 // Model for library
@@ -30,6 +31,15 @@ module.exports = function (app) {
     .get(function (req, res){
       //response will be array of book objects
       //json res format: [{"_id": bookid, "title": book_title, "commentcount": num_of_comments },...]
+      Book.find().select('-comments -__v').exec((err, data) => {
+        if (err) {
+          console.log(err);
+          res.json({'error': err})
+        } else {
+          console.log(data);
+          res.json(data);
+        }
+      })
     })
     
     .post(function (req, res){
@@ -40,7 +50,8 @@ module.exports = function (app) {
       if (req.body.title) {
         let newBook = new Book({
           'title': title,
-          'comments': []
+          'comments': [],
+          "commentcount": 0
         }).save((err, data) => {
           if (err) {
             console.log(err);
