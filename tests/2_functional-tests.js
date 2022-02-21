@@ -13,6 +13,8 @@ const server = require('../server');
 
 chai.use(chaiHttp);
 
+let id;
+
 suite('Functional Tests', function() {
 
   /*
@@ -41,11 +43,33 @@ suite('Functional Tests', function() {
     suite('POST /api/books with title => create book object/expect book object', function() {
       
       test('Test POST /api/books with title', function(done) {
-        //done();
+        chai
+            .request(server)
+            .post('/api/books')
+            .send({
+              'title': 'A Brave New World'
+            })
+            .end((err, res) => {
+              id = res.body['_id']
+              assert.equal(res.status, 200);
+              assert.equal(res.body.title, 'A Brave New World');
+              assert.isNotNull(res.body['_id'], '_id is not null');
+              done();
+            })
       });
       
       test('Test POST /api/books with no title given', function(done) {
-        //done();
+        chai
+            .request(server)
+            .post('/api/books')
+            .send({
+
+            })
+            .end((err, res) => {
+              assert.equal(res.status, 200);
+              assert.equal(res.text, 'missing required field title')
+              done();
+            })
       });
       
     });
@@ -54,7 +78,16 @@ suite('Functional Tests', function() {
     suite('GET /api/books => array of books', function(){
       
       test('Test GET /api/books',  function(done){
-        //done();
+        chai
+            .request(server)
+            .get('/api/books')
+            .end((err, res) => {
+              assert.equal(res.status, 200);
+              assert.isString(res.body[0]['title'], 'The title is a string');
+              assert.isNotNull(res.body[0]['_id'], '_id is not null');
+              assert.isNumber(res.body[0]['commentcount'], 'commentcount is a number');
+              done();
+            })
       });      
       
     });
@@ -63,11 +96,27 @@ suite('Functional Tests', function() {
     suite('GET /api/books/[id] => book object with [id]', function(){
       
       test('Test GET /api/books/[id] with id not in db',  function(done){
-        //done();
+        chai
+            .request(server)
+            .get('/api/books/6213ab0f33b96763041edde')
+            .end((err, res) => {
+              assert.equal(res.status, 200);
+              assert.equal(res.text, 'no book exists');
+              done();
+            })
       });
       
       test('Test GET /api/books/[id] with valid id in db',  function(done){
-        //done();
+        chai
+            .request(server)
+            .get(`/api/books/${id}`)
+            .end((err, res) => {
+              assert.equal(res.status, 200);
+              assert.equal(res.body['_id'], id);
+              assert.isString(res.body.title, 'title is a string');
+              assert.isArray(res.body.comments, 'comments is an array');
+              done();
+            })
       });
       
     });
