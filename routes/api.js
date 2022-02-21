@@ -62,8 +62,8 @@ module.exports = function (app) {
           } else {
             console.log(data);
             res.json({
-              "title": data.title,
-              "_id": data["_id"]
+              "_id": data["_id"],
+              "title": data.title
             })
           }
         })
